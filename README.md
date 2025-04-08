@@ -1,20 +1,20 @@
-# coffig
+# coffi
 
-[![npm version](https://img.shields.io/npm/v/coffig.svg?style=flat-square)](https://www.npmjs.com/package/coffig)
-[![npm downloads](https://img.shields.io/npm/dm/coffig.svg?style=flat-square)](https://www.npmjs.com/package/coffig)
+[![npm version](https://img.shields.io/npm/v/coffi.svg?style=flat-square)](https://www.npmjs.com/package/coffi)
+[![npm downloads](https://img.shields.io/npm/dm/coffi.svg?style=flat-square)](https://www.npmjs.com/package/coffi)
 
 ⚡️ A fast, lightweight, easy-to-use, configuration files loader 📄
 
 ## Installation
 
 ```bash
-npm install coffig
+npm install coffi
 ```
 
 ## Quick Start
 
 ```typescript
-import { loadConfig } from "coffig";
+import { loadConfig } from "coffi";
 
 // Load your config file
 const { config } = await loadConfig("app.config");
@@ -53,7 +53,7 @@ const { config } = await loadConfig({
 ### Error Handling
 
 ```typescript
-import { loadConfig, ConfigLoadError } from "coffig";
+import { loadConfig, ConfigLoadError } from "coffi";
 
 try {
   const { config } = await loadConfig("app.config");
