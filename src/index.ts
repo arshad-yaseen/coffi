@@ -21,7 +21,7 @@ async function loadConfigInternal<T>(
   name: string,
   extensions: string[],
   cwd: string,
-  maxDepth: number
+  maxDepth: number,
 ): Promise<LoadConfigResult<T>> {
   let currentDir = cwd;
   let currentDepth = 0;
@@ -54,8 +54,8 @@ async function loadConfigInternal<T>(
         } catch (error) {
           throw new ConfigLoadError(
             `Failed to load config from ${filepath}: ${parseErrorMessage(
-              error
-            )}`
+              error,
+            )}`,
           );
         }
       }
@@ -73,15 +73,15 @@ async function loadConfigInternal<T>(
 
   throw new ConfigLoadError(
     `Could not find config file '${name}' with extensions [${extensions.join(
-      ", "
-    )}] within ${maxDepth} directories`
+      ", ",
+    )}] within ${maxDepth} directories`,
   );
 }
 
 export async function loadConfig<T = unknown>(
   nameOrOptions: string | LoadConfigOptions,
   extensions: string[] = [".ts", ".js", ".json"],
-  options: Omit<LoadConfigOptions, "name" | "extensions"> = {}
+  options: Omit<LoadConfigOptions, "name" | "extensions"> = {},
 ): Promise<LoadConfigResult<T>> {
   if (typeof nameOrOptions === "string") {
     const name = nameOrOptions;
