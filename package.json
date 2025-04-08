@@ -1,5 +1,5 @@
 {
-  "name": "coffig",
+  "name": "coffi",
   "description": "📄 A fast, easy-to-use, configuration files loader 😄",
   "version": "0.0.2",
   "main": "./dist/index.js",
