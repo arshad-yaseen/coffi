@@ -1,5 +1,5 @@
 export default function () {
-  return {
-    name: "function",
-  };
+    return {
+        name: "function",
+    };
 }

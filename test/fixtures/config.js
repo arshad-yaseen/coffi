@@ -1,3 +1,3 @@
 module.exports = {
-  name: "js",
+    name: "js",
 };
