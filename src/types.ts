@@ -1,3 +1,12 @@
+export type Extention =
+  | ".ts"
+  | ".mts"
+  | ".cts"
+  | ".js"
+  | ".mjs"
+  | ".cjs"
+  | ".json";
+
 /**
  * Options for loading a configuration file.
  */
@@ -11,7 +20,7 @@ export interface LoadConfigOptions {
    * An array of file extensions to look for, in order of priority.
    * Defaults to [".ts", ".js", ".json"]
    */
-  extensions?: string[];
+  extensions?: Extention[];
 
   /**
    * The current working directory to start searching from.

@@ -6,22 +6,22 @@ import { FIXTURES_DIR } from "./constants";
 describe("loadConfig", () => {
   it("should load config correctly", async () => {
     const { config, filepath } = await loadConfig<{ name: string }>({
-      name: "name1",
+      name: "config",
       cwd: FIXTURES_DIR,
     });
     expect(config).toBeDefined();
-    expect(filepath).toBe(path.join(FIXTURES_DIR, "name1.ts"));
-    expect(config.name).toBe("name1");
+    expect(filepath).toBe(path.join(FIXTURES_DIR, "config.ts"));
+    expect(config.name).toBe("config");
   });
 
   it("should respect extensions priority", async () => {
     const { config, filepath } = await loadConfig<{ name: string }>({
-      name: "name1",
+      name: "config",
       cwd: FIXTURES_DIR,
       extensions: [".json", ".ts"],
     });
-    expect(filepath).toBe(path.join(FIXTURES_DIR, "name1.json"));
-    expect(config.name).toBe("name1");
+    expect(filepath).toBe(path.join(FIXTURES_DIR, "config.json"));
+    expect(config.name).toBe("config");
   });
 
   it("should throw error for non-existent config", async () => {
@@ -35,12 +35,12 @@ describe("loadConfig", () => {
 
   it("should load JSON config correctly", async () => {
     const { config, filepath } = await loadConfig<{ name: string }>({
-      name: "name1",
+      name: "config",
       cwd: FIXTURES_DIR,
       extensions: [".json"],
     });
-    expect(filepath).toBe(path.join(FIXTURES_DIR, "name1.json"));
-    expect(config.name).toBe("name1");
+    expect(filepath).toBe(path.join(FIXTURES_DIR, "config.json"));
+    expect(config.name).toBe("config");
   });
 
   it("should find config in parent directory", async () => {
@@ -82,11 +82,61 @@ describe("loadConfig", () => {
 
   it("should work with string name parameter", async () => {
     const { config, filepath } = await loadConfig<{ name: string }>(
-      "name1",
+      "config",
       [".ts"],
       { cwd: FIXTURES_DIR },
     );
-    expect(filepath).toBe(path.join(FIXTURES_DIR, "name1.ts"));
-    expect(config.name).toBe("name1");
+    expect(filepath).toBe(path.join(FIXTURES_DIR, "config.ts"));
+    expect(config.name).toBe("config");
+  });
+
+  it("should load .mts config correctly", async () => {
+    const { config, filepath } = await loadConfig<{ name: string }>({
+      name: "config",
+      cwd: FIXTURES_DIR,
+      extensions: [".mts"],
+    });
+    expect(filepath).toBe(path.join(FIXTURES_DIR, "config.mts"));
+    expect(config.name).toBe("mts");
+  });
+
+  it("should load .cts config correctly", async () => {
+    const { config, filepath } = await loadConfig<{ name: string }>({
+      name: "config",
+      cwd: FIXTURES_DIR,
+      extensions: [".cts"],
+    });
+    expect(filepath).toBe(path.join(FIXTURES_DIR, "config.cts"));
+    expect(config.name).toBe("cts");
+  });
+
+  it("should load .js config correctly", async () => {
+    const { config, filepath } = await loadConfig<{ name: string }>({
+      name: "config",
+      cwd: FIXTURES_DIR,
+      extensions: [".js"],
+    });
+    expect(filepath).toBe(path.join(FIXTURES_DIR, "config.js"));
+    expect(config.name).toBe("js");
+  });
+
+  it("should load .mjs config correctly", async () => {
+    const { config, filepath } = await loadConfig<{ name: string }>({
+      name: "config",
+      cwd: FIXTURES_DIR,
+      extensions: [".mjs"],
+    });
+    expect(filepath).toBe(path.join(FIXTURES_DIR, "config.mjs"));
+    expect(config.name).toBe("mjs");
+  });
+
+  it("should load .cjs config correctly", async () => {
+    const { config, filepath } = await loadConfig<{ name: string }>({
+      name: "config",
+      cwd: FIXTURES_DIR,
+      extensions: [".cjs"],
+    });
+    expect(filepath).toBe(path.join(FIXTURES_DIR, "config.cjs"));
+    expect(config.name).toBe("cjs");
   });
 });

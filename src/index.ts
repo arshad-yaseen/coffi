@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { DEFAULT_EXTENSIONS } from "./defaults";
 import {
   ConfigLoadError,
   type LoadConfigOptions,
@@ -80,7 +81,7 @@ async function loadConfigInternal<T>(
 
 export async function loadConfig<T = unknown>(
   nameOrOptions: string | LoadConfigOptions,
-  extensions: string[] = [".ts", ".js", ".json"],
+  extensions: string[] = DEFAULT_EXTENSIONS,
   options: Omit<LoadConfigOptions, "name" | "extensions"> = {},
 ): Promise<LoadConfigResult<T>> {
   if (typeof nameOrOptions === "string") {
@@ -91,7 +92,7 @@ export async function loadConfig<T = unknown>(
 
   const {
     name,
-    extensions: exts = [".ts", ".js", ".json"],
+    extensions: exts = DEFAULT_EXTENSIONS,
     cwd = process.cwd(),
     maxDepth = 10,
   } = nameOrOptions;

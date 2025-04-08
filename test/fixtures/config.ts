@@ -1,3 +1,3 @@
 export default {
-  name: "name1",
+  name: "config",
 };

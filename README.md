@@ -18,12 +18,11 @@ npm install coffi
 ```typescript
 import { loadConfig } from "coffi";
 
-// Loads app.config.ts, app.config.js, or app.config.json
+// Loads config from the first matching file extension (see priority list below)
 const { config, filepath } = await loadConfig("app.config");
 
-// Or specify which extensions to search for
-const { config: jsonConfig } = await loadConfig("app.config", [".json"]);
-
+// Or specify custom extensions to search for (in priority order)
+const { config } = await loadConfig("app.config", [".json"]);
 ```
 
 ### File Priority
@@ -31,8 +30,12 @@ const { config: jsonConfig } = await loadConfig("app.config", [".json"]);
 The loader checks files in this order:
 
 1. `.ts` files
-2. `.js` files
-3. `.json` files
+2. `.mts` files
+3. `.cts` files
+4. `.js` files
+5. `.mjs` files
+6. `.cjs` files
+7. `.json` files
 
 You can customize this order using the `extensions` option.
 
