@@ -5,10 +5,13 @@ import { FIXTURES_DIR } from "./constants";
 
 describe("loadConfig", () => {
     it("should load config correctly", async () => {
+        const start = Date.now();
         const { config, filepath } = await loadConfig<{ name: string }>({
             name: "config",
             cwd: FIXTURES_DIR,
         });
+        const end = Date.now();
+        console.log(`Time taken: ${end - start}ms`);
         expect(config).toBeDefined();
         expect(filepath).toBe(path.join(FIXTURES_DIR, "config.ts"));
         expect(config?.name).toBe("config");
