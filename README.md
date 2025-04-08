@@ -55,17 +55,3 @@ const { config } = await loadConfig({
 ```
 
 The `preferredPath` option allows you to specify an exact file path to load, bypassing the normal file search process. When provided, coffi will directly load the configuration from this path.
-
-### Error Handling
-
-```typescript
-import { loadConfig, ConfigLoadError } from "coffi";
-
-try {
-  const { config } = await loadConfig("app.config");
-} catch (error) {
-  if (error instanceof ConfigLoadError) {
-    console.error("Config not found:", error.message);
-  }
-}
-```
