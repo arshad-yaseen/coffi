@@ -22,6 +22,12 @@
         "prepare": "husky"
     },
     "dependencies": {},
+    "keywords": [
+        "config",
+        "config-loader",
+        "config-files",
+        "config-files-loader"
+    ],
     "devDependencies": {
         "@biomejs/biome": "^1.9.4",
         "@commitlint/cli": "^19.8.0",
