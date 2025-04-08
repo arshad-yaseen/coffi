@@ -14,6 +14,15 @@ describe("loadConfig", () => {
     expect(config.name).toBe("config");
   });
 
+  it("should throw error for non-existent config", async () => {
+    await expect(
+      loadConfig<{ name: string }>({
+        name: "nonexistent",
+        cwd: FIXTURES_DIR,
+      }),
+    ).rejects.toThrow(ConfigLoadError);
+  });
+
   it("should respect extensions priority", async () => {
     const { config, filepath } = await loadConfig<{ name: string }>({
       name: "config",
@@ -22,15 +31,6 @@ describe("loadConfig", () => {
     });
     expect(filepath).toBe(path.join(FIXTURES_DIR, "config.json"));
     expect(config.name).toBe("config");
-  });
-
-  it("should throw error for non-existent config", async () => {
-    await expect(
-      loadConfig<{ name: string }>({
-        name: "nonexistent",
-        cwd: FIXTURES_DIR,
-      }),
-    ).rejects.toThrow(ConfigLoadError);
   });
 
   it("should load JSON config correctly", async () => {
