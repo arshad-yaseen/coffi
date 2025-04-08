@@ -1,6 +1,6 @@
 {
   "name": "coffi",
-  "description": "📄 A fast, easy-to-use, configuration files loader 😄",
+  "description": "⚡️ A fast, lightweight, easy-to-use, configuration files loader 📄",
   "version": "0.0.4",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
