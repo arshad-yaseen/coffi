@@ -11,20 +11,13 @@
 npm install coffi
 ```
 
-## Quick Start
-
-```typescript
-import { loadConfig } from "coffi";
-
-// Load your config file
-const { config } = await loadConfig("app.config");
-```
-
 ## Usage
 
 ### Basic Usage
 
 ```typescript
+import { loadConfig } from "coffi";
+
 // Loads app.config.ts, app.config.js, or app.config.json
 const { config, filepath } = await loadConfig("app.config");
 ```
