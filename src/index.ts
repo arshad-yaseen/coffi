@@ -1,8 +1,8 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { DEFAULT_EXTENSIONS } from "./defaults";
-import type { LoadConfigOptions, LoadConfigResult } from "./types";
 import { logger } from "./logger";
+import type { LoadConfigOptions, LoadConfigResult } from "./types";
 
 export * from "./types";
 
