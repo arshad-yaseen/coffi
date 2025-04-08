@@ -22,7 +22,7 @@ import { loadConfig } from "coffi";
 const { config, filepath } = await loadConfig("app.config");
 
 // Or specify custom extensions to search for (in priority order)
-const { config } = await loadConfig("app.config", [".json"]);
+const { config } = await loadConfig("tsconfig", [".json"]);
 ```
 
 ### File Priority
