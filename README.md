@@ -1,6 +1,9 @@
 # conffig
 
-A TypeScript library built with [bunup](https://bunup.arshadyaseen.com/).
+[![npm version](https://img.shields.io/npm/v/conffig.svg?style=flat-square)](https://www.npmjs.com/package/conffig)
+[![npm downloads](https://img.shields.io/npm/dm/conffig.svg?style=flat-square)](https://www.npmjs.com/package/conffig)
+
+⚡️ A fast, easy-to-use, configuration files loader 📄
 
 ## Installation
 
@@ -8,35 +11,64 @@ A TypeScript library built with [bunup](https://bunup.arshadyaseen.com/).
 npm install conffig
 ```
 
-## Usage
+## Quick Start
 
 ```typescript
-import { greet } from 'conffig';
+import { loadConfig } from "conffig";
 
-console.log(greet('World')); // Hello, World!
+// Load your config file
+const { config } = await loadConfig("app.config");
 ```
 
-## Development
+## Features
 
-```bash
-# Install dependencies
-bun install
+- 🔍 Automatically finds config files in parent directories
+- 📦 Supports TypeScript, JavaScript, and JSON files
+- ⚡️ Zero dependencies
+- 🎯 TypeScript support out of the box
+- 🔄 Supports both synchronous and asynchronous config files
+- 🎨 Supports function-based configs that return values or promises
 
-# Build
-bun run build
+## Usage
 
-# Develop with watch mode
-bun run dev
+### Basic Usage
 
-# Run tests
-bun run test
+```typescript
+// Loads app.config.ts, app.config.js, or app.config.json
+const { config, filepath } = await loadConfig("app.config");
 ```
 
-## Contributing
+### File Priority
 
-Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for contribution guidelines.
+The loader checks files in this order:
 
-## License
+1. `.ts` files
+2. `.js` files
+3. `.json` files
 
-MIT
-# conffig
+You can customize this order using the `extensions` option.
+
+### With Options
+
+```typescript
+const { config } = await loadConfig({
+  name: "database.config",
+  extensions: [".js", ".json", ".ts"],
+  cwd: path.join(__dirname, "config"),
+  maxDepth: 1, // (set to 1 to search only in current directory)
+});
+```
+
+### Error Handling
+
+```typescript
+import { loadConfig, ConfigLoadError } from "conffig";
+
+try {
+  const { config } = await loadConfig("app.config");
+} catch (error) {
+  if (error instanceof ConfigLoadError) {
+    console.error("Config not found:", error.message);
+  }
+}
+```

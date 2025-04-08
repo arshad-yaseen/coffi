@@ -1,6 +1,11 @@
-import { existsSync, readFileSync } from "fs";
-import { dirname, join, resolve } from "path";
-import { ConfigLoadError, LoadConfigOptions, LoadConfigResult } from "./types";
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import {
+  ConfigLoadError,
+  type LoadConfigOptions,
+  type LoadConfigResult,
+} from "./types";
+import { parseErrorMessage } from "./utils";
 
 export * from "./types";
 
@@ -46,9 +51,11 @@ async function loadConfigInternal<T>(
           }
 
           return { config, filepath };
-        } catch (error: any) {
+        } catch (error) {
           throw new ConfigLoadError(
-            `Failed to load config from ${filepath}: ${error.message}`
+            `Failed to load config from ${filepath}: ${parseErrorMessage(
+              error
+            )}`
           );
         }
       }
@@ -71,7 +78,7 @@ async function loadConfigInternal<T>(
   );
 }
 
-export async function loadConfig<T>(
+export async function loadConfig<T = unknown>(
   nameOrOptions: string | LoadConfigOptions,
   extensions: string[] = [".ts", ".js", ".json"],
   options: Omit<LoadConfigOptions, "name" | "extensions"> = {}
@@ -80,13 +87,13 @@ export async function loadConfig<T>(
     const name = nameOrOptions;
     const { cwd = process.cwd(), maxDepth = 10 } = options;
     return loadConfigInternal<T>(name, extensions, cwd, maxDepth);
-  } else {
-    const {
-      name,
-      extensions: exts = [".ts", ".js", ".json"],
-      cwd = process.cwd(),
-      maxDepth = 10,
-    } = nameOrOptions;
-    return loadConfigInternal<T>(name, exts, cwd, maxDepth);
   }
+
+  const {
+    name,
+    extensions: exts = [".ts", ".js", ".json"],
+    cwd = process.cwd(),
+    maxDepth = 10,
+  } = nameOrOptions;
+  return loadConfigInternal<T>(name, exts, cwd, maxDepth);
 }

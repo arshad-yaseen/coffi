@@ -1,7 +1,7 @@
-import { describe, it, expect } from "vitest";
-import { loadConfig, ConfigLoadError } from "../src";
+import path from "node:path";
+import { describe, expect, it } from "vitest";
+import { ConfigLoadError, loadConfig } from "../src";
 import { FIXTURES_DIR } from "./constants";
-import path from "path";
 
 describe("loadConfig", () => {
   it("should load config correctly", async () => {
@@ -39,7 +39,7 @@ describe("loadConfig", () => {
       loadConfig<{ name: string }>({
         name: "nonexistent",
         cwd: FIXTURES_DIR,
-      })
+      }),
     ).rejects.toThrow(ConfigLoadError);
   });
 
@@ -68,7 +68,7 @@ describe("loadConfig", () => {
         name: "parentConfig",
         cwd: path.join(FIXTURES_DIR, "subdir", "deep"),
         maxDepth: 1,
-      })
+      }),
     ).rejects.toThrow(ConfigLoadError);
   });
 
@@ -94,7 +94,7 @@ describe("loadConfig", () => {
     const { config, filepath } = await loadConfig<{ name: string }>(
       "name1",
       [".ts"],
-      { cwd: FIXTURES_DIR }
+      { cwd: FIXTURES_DIR },
     );
     expect(filepath).toBe(path.join(FIXTURES_DIR, "name1.ts"));
     expect(config.name).toBe("name1");
