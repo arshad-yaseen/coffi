@@ -1,12 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { DEFAULT_EXTENSIONS } from "./defaults";
-import {
-    ConfigLoadError,
-    type LoadConfigOptions,
-    type LoadConfigResult,
-} from "./types";
-import { parseErrorMessage } from "./utils";
+import type { LoadConfigOptions, LoadConfigResult } from "./types";
 
 export * from "./types";
 
@@ -18,12 +13,53 @@ function _exists(filepath: string): boolean {
     }
 }
 
+async function parseConfigFile<T>(filepath: string): Promise<T | null> {
+    try {
+        if (!_exists(filepath)) {
+            return null;
+        }
+
+        const ext = filepath.slice(filepath.lastIndexOf(".")).toLowerCase();
+
+        if (ext === ".json") {
+            const file = readFileSync(filepath, "utf-8");
+            return JSON.parse(file) as T;
+        }
+
+        const module = await import(filepath);
+        let config = module.default || module;
+
+        if (typeof config === "function") {
+            config = config();
+        }
+
+        if (config instanceof Promise) {
+            return config as unknown as T;
+        }
+
+        return config as T;
+    } catch (error) {
+        return null;
+    }
+}
+
 async function loadConfigInternal<T>(
     name: string,
     extensions: string[],
     cwd: string,
     maxDepth: number,
+    preferredPath: string | undefined,
 ): Promise<LoadConfigResult<T>> {
+    if (preferredPath) {
+        const config = await parseConfigFile<T>(preferredPath);
+        if (config !== null) {
+            return { config, filepath: preferredPath };
+        }
+        console.warn(
+            `Preferred path "${preferredPath}" not found or invalid, falling back to search.`,
+        );
+    }
+
     let currentDir = cwd;
     let currentDepth = 0;
 
@@ -32,34 +68,9 @@ async function loadConfigInternal<T>(
             const filepath = join(currentDir, `${name}${ext}`);
 
             if (_exists(filepath)) {
-                try {
-                    let config: T | null = null;
-
-                    if (ext === ".json") {
-                        const file = readFileSync(filepath, "utf-8");
-                        config = JSON.parse(file) as T;
-                    } else {
-                        const module = await import(
-                            `${filepath}?t=${Date.now()}`
-                        );
-                        config = module.default || module;
-
-                        if (typeof config === "function") {
-                            config = config();
-                        }
-
-                        if (config instanceof Promise) {
-                            config = await config;
-                        }
-                    }
-
+                const config = await parseConfigFile<T>(filepath);
+                if (config !== null) {
                     return { config, filepath };
-                } catch (error) {
-                    throw new ConfigLoadError(
-                        `Failed to load config from ${filepath}: ${parseErrorMessage(
-                            error,
-                        )}`,
-                    );
                 }
             }
         }
@@ -74,11 +85,7 @@ async function loadConfigInternal<T>(
         currentDepth++;
     }
 
-    throw new ConfigLoadError(
-        `Could not find config file '${name}' with extensions [${extensions.join(
-            ", ",
-        )}] within ${maxDepth} directories`,
-    );
+    return { config: null, filepath: null };
 }
 
 export async function loadConfig<T = unknown>(
@@ -88,8 +95,14 @@ export async function loadConfig<T = unknown>(
 ): Promise<LoadConfigResult<T>> {
     if (typeof nameOrOptions === "string") {
         const name = nameOrOptions;
-        const { cwd = process.cwd(), maxDepth = 10 } = options;
-        return loadConfigInternal<T>(name, extensions, cwd, maxDepth);
+        const { cwd = process.cwd(), maxDepth = 10, preferredPath } = options;
+        return loadConfigInternal<T>(
+            name,
+            extensions,
+            cwd,
+            maxDepth,
+            preferredPath,
+        );
     }
 
     const {
@@ -97,6 +110,7 @@ export async function loadConfig<T = unknown>(
         extensions: exts = DEFAULT_EXTENSIONS,
         cwd = process.cwd(),
         maxDepth = 10,
+        preferredPath,
     } = nameOrOptions;
-    return loadConfigInternal<T>(name, exts, cwd, maxDepth);
+    return loadConfigInternal<T>(name, exts, cwd, maxDepth, preferredPath);
 }

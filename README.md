@@ -39,16 +39,22 @@ The loader checks files in this order:
 
 You can customize this order using the `extensions` option.
 
-### With Options
+### Options
 
 ```typescript
+import { loadConfig } from "coffi";
+import path from "node:path";
+
 const { config } = await loadConfig({
   name: "database.config",
   extensions: [".js", ".json", ".ts"],
   cwd: path.join(__dirname, "config"),
   maxDepth: 1, // (set to 1 to search only in current directory)
+  preferredPath: "/absolute/path/to/config.js", // Skip search and load from this path
 });
 ```
+
+The `preferredPath` option allows you to specify an exact file path to load, bypassing the normal file search process. When provided, coffi will directly load the configuration from this path.
 
 ### Error Handling
 

@@ -33,6 +33,12 @@ export interface LoadConfigOptions {
      * Defaults to 10.
      */
     maxDepth?: number;
+
+    /**
+     * The preferred path to the configuration file.
+     * If provided, directly load the config from this path and skip the search.
+     */
+    preferredPath?: string;
 }
 
 /**
@@ -48,14 +54,4 @@ export interface LoadConfigResult<T> {
      * The full path to the loaded configuration file or null if no configuration file was found.
      */
     filepath: string | null;
-}
-
-/**
- * Error thrown when a configuration file cannot be loaded.
- */
-export class ConfigLoadError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = "ConfigLoadError";
-    }
 }

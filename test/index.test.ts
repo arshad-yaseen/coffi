@@ -1,6 +1,6 @@
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { ConfigLoadError, loadConfig } from "../src";
+import { loadConfig } from "../src";
 import { FIXTURES_DIR } from "./constants";
 
 describe("loadConfig", () => {
@@ -14,13 +14,13 @@ describe("loadConfig", () => {
         expect(config?.name).toBe("config");
     });
 
-    it("should throw error for non-existent config", async () => {
-        await expect(
-            loadConfig<{ name: string }>({
-                name: "nonexistent",
-                cwd: FIXTURES_DIR,
-            }),
-        ).rejects.toThrow(ConfigLoadError);
+    it("path and name should be null for non-existent config", async () => {
+        const { config, filepath } = await loadConfig<{ name: string }>({
+            name: "nonexistent",
+            cwd: FIXTURES_DIR,
+        });
+        expect(config).toBeNull();
+        expect(filepath).toBeNull();
     });
 
     it("should respect extensions priority", async () => {
@@ -53,13 +53,13 @@ describe("loadConfig", () => {
     });
 
     it("should respect maxDepth option", async () => {
-        await expect(
-            loadConfig<{ name: string }>({
-                name: "parentConfig",
-                cwd: path.join(FIXTURES_DIR, "subdir", "deep"),
-                maxDepth: 1,
-            }),
-        ).rejects.toThrow(ConfigLoadError);
+        const { config, filepath } = await loadConfig<{ name: string }>({
+            name: "parentConfig",
+            cwd: path.join(FIXTURES_DIR, "subdir", "deep"),
+            maxDepth: 1,
+        });
+        expect(config).toBeNull();
+        expect(filepath).toBeNull();
     });
 
     it("should handle function exports", async () => {
