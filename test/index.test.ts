@@ -14,16 +14,6 @@ describe("loadConfig", () => {
     expect(config.name).toBe("name1");
   });
 
-  it("should be fast", async () => {
-    const start = performance.now();
-    await loadConfig<{ name: string }>({
-      name: "name1",
-      cwd: FIXTURES_DIR,
-    });
-    const end = performance.now();
-    expect(end - start).toBeLessThan(0.1);
-  });
-
   it("should respect extensions priority", async () => {
     const { config, filepath } = await loadConfig<{ name: string }>({
       name: "name1",

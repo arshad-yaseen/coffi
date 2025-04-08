@@ -20,15 +20,6 @@ import { loadConfig } from "conffig";
 const { config } = await loadConfig("app.config");
 ```
 
-## Features
-
-- 🔍 Automatically finds config files in parent directories
-- 📦 Supports TypeScript, JavaScript, and JSON files
-- ⚡️ Zero dependencies
-- 🎯 TypeScript support out of the box
-- 🔄 Supports both synchronous and asynchronous config files
-- 🎨 Supports function-based configs that return values or promises
-
 ## Usage
 
 ### Basic Usage
