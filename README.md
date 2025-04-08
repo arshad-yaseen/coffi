@@ -50,7 +50,7 @@ const { config } = await loadConfig({
   extensions: [".js", ".json", ".ts"],
   cwd: path.join(__dirname, "config"),
   maxDepth: 1, // (set to 1 to search only in current directory)
-  preferredPath: "/absolute/path/to/config.js", // Skip search and load from this path
+  preferredPath: "path/to/config.js", // Skip search and load from this path
 });
 ```
 
