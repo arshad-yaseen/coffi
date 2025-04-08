@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "conffig",
+      "name": "coffig",
       "devDependencies": {
         "@biomejs/biome": "^1.9.4",
         "@commitlint/cli": "^19.8.0",
