@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/conffig.svg?style=flat-square)](https://www.npmjs.com/package/conffig)
 [![npm downloads](https://img.shields.io/npm/dm/conffig.svg?style=flat-square)](https://www.npmjs.com/package/conffig)
 
-⚡️ A fast, easy-to-use, configuration files loader 📄
+⚡️ A fast, lightweight, easy-to-use, configuration files loader 📄
 
 ## Installation
 
