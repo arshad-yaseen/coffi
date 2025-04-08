@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { DEFAULT_EXTENSIONS } from "./defaults";
 import type { LoadConfigOptions, LoadConfigResult } from "./types";
+import { logger } from "./logger";
 
 export * from "./types";
 
@@ -55,8 +56,8 @@ async function loadConfigInternal<T>(
         if (config !== null) {
             return { config, filepath: preferredPath };
         }
-        console.warn(
-            `Preferred path "${preferredPath}" not found or invalid, falling back to search.`,
+        logger.warn(
+            `Preferred path "${preferredPath}" not found or invalid, searching for ${name} files instead.`,
         );
     }
 

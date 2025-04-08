@@ -139,4 +139,24 @@ describe("loadConfig", () => {
         expect(filepath).toBe(path.join(FIXTURES_DIR, "config.cjs"));
         expect(config?.name).toBe("cjs");
     });
+
+    it("should load config from preferred path when valid", async () => {
+        const { config, filepath } = await loadConfig<{ name: string }>({
+            name: "config",
+            cwd: FIXTURES_DIR,
+            preferredPath: path.join(FIXTURES_DIR, "config.json"),
+        });
+        expect(filepath).toBe(path.join(FIXTURES_DIR, "config.json"));
+        expect(config?.name).toBe("config");
+    });
+
+    it("should fall back to normal search when preferred path is invalid", async () => {
+        const { config, filepath } = await loadConfig<{ name: string }>({
+            name: "config",
+            cwd: FIXTURES_DIR,
+            preferredPath: path.join(FIXTURES_DIR, "nonexistent.json"),
+        });
+        expect(filepath).toBe(path.join(FIXTURES_DIR, "config.ts"));
+        expect(config?.name).toBe("config");
+    });
 });
