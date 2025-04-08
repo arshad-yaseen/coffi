@@ -20,6 +20,10 @@ import { loadConfig } from "coffi";
 
 // Loads app.config.ts, app.config.js, or app.config.json
 const { config, filepath } = await loadConfig("app.config");
+
+// Or specify which extensions to search for
+const { config: jsonConfig } = await loadConfig("app.config", [".json"]);
+
 ```
 
 ### File Priority
