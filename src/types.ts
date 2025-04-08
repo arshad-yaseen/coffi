@@ -40,14 +40,14 @@ export interface LoadConfigOptions {
  */
 export interface LoadConfigResult<T> {
     /**
-     * The loaded configuration object.
+     * The loaded configuration object or null if no configuration file was found.
      */
-    config: T;
+    config: T | null;
 
     /**
-     * The full path to the loaded configuration file.
+     * The full path to the loaded configuration file or null if no configuration file was found.
      */
-    filepath: string;
+    filepath: string | null;
 }
 
 /**

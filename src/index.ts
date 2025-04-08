@@ -33,7 +33,7 @@ async function loadConfigInternal<T>(
 
             if (_exists(filepath)) {
                 try {
-                    let config: T;
+                    let config: T | null = null;
 
                     if (ext === ".json") {
                         const file = readFileSync(filepath, "utf-8");

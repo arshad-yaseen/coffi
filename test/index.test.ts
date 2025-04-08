@@ -11,7 +11,7 @@ describe("loadConfig", () => {
         });
         expect(config).toBeDefined();
         expect(filepath).toBe(path.join(FIXTURES_DIR, "config.ts"));
-        expect(config.name).toBe("config");
+        expect(config?.name).toBe("config");
     });
 
     it("should throw error for non-existent config", async () => {
@@ -30,7 +30,7 @@ describe("loadConfig", () => {
             extensions: [".json", ".ts"],
         });
         expect(filepath).toBe(path.join(FIXTURES_DIR, "config.json"));
-        expect(config.name).toBe("config");
+        expect(config?.name).toBe("config");
     });
 
     it("should load JSON config correctly", async () => {
@@ -40,7 +40,7 @@ describe("loadConfig", () => {
             extensions: [".json"],
         });
         expect(filepath).toBe(path.join(FIXTURES_DIR, "config.json"));
-        expect(config.name).toBe("config");
+        expect(config?.name).toBe("config");
     });
 
     it("should find config in parent directory", async () => {
@@ -49,7 +49,7 @@ describe("loadConfig", () => {
             cwd: path.join(FIXTURES_DIR, "subdir"),
         });
         expect(filepath).toBe(path.join(FIXTURES_DIR, "parentConfig.ts"));
-        expect(config.name).toBe("parent");
+        expect(config?.name).toBe("parent");
     });
 
     it("should respect maxDepth option", async () => {
@@ -68,7 +68,7 @@ describe("loadConfig", () => {
             cwd: FIXTURES_DIR,
         });
         expect(filepath).toBe(path.join(FIXTURES_DIR, "functionConfig.ts"));
-        expect(config.name).toBe("function");
+        expect(config?.name).toBe("function");
     });
 
     it("should handle async exports", async () => {
@@ -77,7 +77,7 @@ describe("loadConfig", () => {
             cwd: FIXTURES_DIR,
         });
         expect(filepath).toBe(path.join(FIXTURES_DIR, "asyncConfig.ts"));
-        expect(config.name).toBe("async");
+        expect(config?.name).toBe("async");
     });
 
     it("should work with string name parameter", async () => {
@@ -87,7 +87,7 @@ describe("loadConfig", () => {
             { cwd: FIXTURES_DIR },
         );
         expect(filepath).toBe(path.join(FIXTURES_DIR, "config.ts"));
-        expect(config.name).toBe("config");
+        expect(config?.name).toBe("config");
     });
 
     it("should load .mts config correctly", async () => {
@@ -97,7 +97,7 @@ describe("loadConfig", () => {
             extensions: [".mts"],
         });
         expect(filepath).toBe(path.join(FIXTURES_DIR, "config.mts"));
-        expect(config.name).toBe("mts");
+        expect(config?.name).toBe("mts");
     });
 
     it("should load .cts config correctly", async () => {
@@ -107,7 +107,7 @@ describe("loadConfig", () => {
             extensions: [".cts"],
         });
         expect(filepath).toBe(path.join(FIXTURES_DIR, "config.cts"));
-        expect(config.name).toBe("cts");
+        expect(config?.name).toBe("cts");
     });
 
     it("should load .js config correctly", async () => {
@@ -117,7 +117,7 @@ describe("loadConfig", () => {
             extensions: [".js"],
         });
         expect(filepath).toBe(path.join(FIXTURES_DIR, "config.js"));
-        expect(config.name).toBe("js");
+        expect(config?.name).toBe("js");
     });
 
     it("should load .mjs config correctly", async () => {
@@ -127,7 +127,7 @@ describe("loadConfig", () => {
             extensions: [".mjs"],
         });
         expect(filepath).toBe(path.join(FIXTURES_DIR, "config.mjs"));
-        expect(config.name).toBe("mjs");
+        expect(config?.name).toBe("mjs");
     });
 
     it("should load .cjs config correctly", async () => {
@@ -137,6 +137,6 @@ describe("loadConfig", () => {
             extensions: [".cjs"],
         });
         expect(filepath).toBe(path.join(FIXTURES_DIR, "config.cjs"));
-        expect(config.name).toBe("cjs");
+        expect(config?.name).toBe("cjs");
     });
 });
