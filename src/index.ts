@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { DEFAULT_EXTENSIONS } from "./defaults";
 import { logger } from "./logger";
@@ -65,23 +65,26 @@ async function loadConfigInternal<T>(
     let currentDepth = 0;
 
     while (currentDepth < maxDepth) {
-        for (const ext of extensions) {
-            const filepath = join(currentDir, `${name}${ext}`);
+        try {
+            const files = readdirSync(currentDir);
+            const fileSet = new Set(files);
 
-            if (_exists(filepath)) {
-                const config = await parseConfigFile<T>(filepath);
-                if (config !== null) {
-                    return { config, filepath };
+            for (const ext of extensions) {
+                const filename = `${name}${ext}`;
+                if (fileSet.has(filename)) {
+                    const filepath = join(currentDir, filename);
+                    const config = await parseConfigFile<T>(filepath);
+                    if (config !== null) {
+                        return { config, filepath };
+                    }
                 }
             }
-        }
+        } catch (error) {}
 
         const parentDir = dirname(currentDir);
-
         if (parentDir === currentDir) {
             break;
         }
-
         currentDir = parentDir;
         currentDepth++;
     }
