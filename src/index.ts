@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { DEFAULT_EXTENSIONS } from "./defaults";
 import { logger } from "./logger";
 import type { LoadConfigOptions, LoadConfigResult } from "./types";
@@ -52,9 +52,10 @@ async function loadConfigInternal<T>(
     preferredPath: string | undefined,
 ): Promise<LoadConfigResult<T>> {
     if (preferredPath) {
-        const config = await parseConfigFile<T>(preferredPath);
+        const resolvedPath = resolve(cwd, preferredPath);
+        const config = await parseConfigFile<T>(resolvedPath);
         if (config !== null) {
-            return { config, filepath: preferredPath };
+            return { config, filepath: resolvedPath };
         }
         logger.warn(
             `Preferred path "${preferredPath}" not found or invalid, searching for ${name} files instead.`,

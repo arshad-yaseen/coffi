@@ -147,7 +147,7 @@ describe("loadConfig", () => {
         const { config, filepath } = await loadConfig<{ name: string }>({
             name: "config",
             cwd: FIXTURES_DIR,
-            preferredPath: path.join(FIXTURES_DIR, "config.json"),
+            preferredPath: "config.json",
         });
         expect(filepath).toBe(path.join(FIXTURES_DIR, "config.json"));
         expect(config?.name).toBe("config");
@@ -157,7 +157,7 @@ describe("loadConfig", () => {
         const { config, filepath } = await loadConfig<{ name: string }>({
             name: "config",
             cwd: FIXTURES_DIR,
-            preferredPath: path.join(FIXTURES_DIR, "nonexistent.json"),
+            preferredPath: "nonexistent.json",
         });
         expect(filepath).toBe(path.join(FIXTURES_DIR, "config.ts"));
         expect(config?.name).toBe("config");
