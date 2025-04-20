@@ -51,7 +51,10 @@ const { config } = await loadConfig({
   cwd: path.join(__dirname, "config"),
   maxDepth: 1, // (set to 1 to search only in current directory)
   preferredPath: "path/to/config.js", // Skip search and load from this path
+  packageJsonProperty: "myConfig", // Load configuration from package.json
 });
 ```
 
 The `preferredPath` option allows you to specify an exact file path to load, bypassing the normal file search process. When provided, coffi will directly load the configuration from this path.
+
+The `packageJsonProperty` option allows you to load configuration directly from a property in your project's package.json file. When specified, coffi will look for a property with this name in the nearest package.json file, and if found, will use its value as the configuration. This takes precedence over all other configuration sources, making it convenient for projects where you prefer to keep configuration in package.json.
