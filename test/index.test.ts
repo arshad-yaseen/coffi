@@ -162,4 +162,35 @@ describe("loadConfig", () => {
         expect(filepath).toBe(path.join(FIXTURES_DIR, "config.ts"));
         expect(config?.name).toBe("config");
     });
+
+    it("should load config from package.json when packageJsonProperty is specified", async () => {
+        const { config, filepath } = await loadConfig<{ name: string }>({
+            name: "config",
+            cwd: FIXTURES_DIR,
+            packageJsonProperty: "coffiConfig",
+        });
+        expect(filepath).toBe(path.join(FIXTURES_DIR, "package.json"));
+        expect(config?.name).toBe("from-package-json");
+    });
+
+    it("should prioritize package.json config over regular config files", async () => {
+        const { config, filepath } = await loadConfig<{ name: string }>({
+            name: "config",
+            cwd: FIXTURES_DIR,
+            packageJsonProperty: "coffiConfig",
+        });
+        expect(filepath).toBe(path.join(FIXTURES_DIR, "package.json"));
+        expect(config?.name).toBe("from-package-json");
+        expect(config?.name).not.toBe("config");
+    });
+
+    it("should fall back to regular config search when package.json property is missing", async () => {
+        const { config, filepath } = await loadConfig<{ name: string }>({
+            name: "config",
+            cwd: FIXTURES_DIR,
+            packageJsonProperty: "nonexistentProperty",
+        });
+        expect(filepath).toBe(path.join(FIXTURES_DIR, "config.ts"));
+        expect(config?.name).toBe("config");
+    });
 });

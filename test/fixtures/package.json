@@ -1,0 +1,7 @@
+{
+    "name": "test-fixtures",
+    "version": "1.0.0",
+    "coffiConfig": {
+        "name": "from-package-json"
+    }
+}

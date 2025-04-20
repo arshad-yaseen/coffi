@@ -1,10 +1,80 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { DEFAULT_EXTENSIONS } from "./defaults";
 import { logger } from "./logger";
-import type { LoadConfigOptions, LoadConfigResult } from "./types";
 
-export * from "./types";
+export type Extention =
+    | ".ts"
+    | ".mts"
+    | ".cts"
+    | ".js"
+    | ".mjs"
+    | ".cjs"
+    | ".json";
+
+const DEFAULT_EXTENSIONS: Extention[] = [
+    ".ts",
+    ".mts",
+    ".cts",
+    ".js",
+    ".mjs",
+    ".cjs",
+    ".json",
+];
+
+/**
+ * Options for loading a configuration file.
+ */
+export interface LoadConfigOptions {
+    /**
+     * The name of the configuration file without extension.
+     */
+    name: string;
+
+    /**
+     * An array of file extensions to look for, in order of priority.
+     * Defaults to [".ts", ".mts", ".cts", ".js", ".mjs", ".cjs", ".json"]
+     */
+    extensions?: Extention[];
+
+    /**
+     * The current working directory to start searching from.
+     * Defaults to process.cwd()
+     */
+    cwd?: string;
+
+    /**
+     * The maximum depth to search up the directory tree.
+     * Defaults to 10.
+     */
+    maxDepth?: number;
+
+    /**
+     * The preferred path to the configuration file.
+     * If provided, directly load the config from this path after checking package.json.
+     */
+    preferredPath?: string;
+
+    /**
+     * The property name in package.json to extract the configuration from.
+     * If provided, this takes precedence over all other configuration sources.
+     */
+    packageJsonProperty?: string;
+}
+
+/**
+ * Result returned from loading a configuration file.
+ */
+export interface LoadConfigResult<T> {
+    /**
+     * The loaded configuration object or null if no configuration file was found.
+     */
+    config: T | null;
+
+    /**
+     * The full path to the loaded configuration file or null if no configuration file was found.
+     */
+    filepath: string | null;
+}
 
 function _exists(filepath: string): boolean {
     try {
@@ -44,13 +114,57 @@ async function parseConfigFile<T>(filepath: string): Promise<T | null> {
     }
 }
 
+/**
+ * Finds the nearest package.json file by searching up the directory tree from cwd.
+ * @param cwd The starting directory.
+ * @param maxDepth The maximum number of parent directories to search.
+ * @returns The path to package.json or null if not found.
+ */
+function findPackageJson(cwd: string, maxDepth: number): string | null {
+    let currentDir = cwd;
+    let currentDepth = 0;
+
+    while (currentDepth < maxDepth) {
+        const packageJsonPath = join(currentDir, "package.json");
+        if (_exists(packageJsonPath)) {
+            return packageJsonPath;
+        }
+        const parentDir = dirname(currentDir);
+        if (parentDir === currentDir) {
+            break;
+        }
+        currentDir = parentDir;
+        currentDepth++;
+    }
+    return null;
+}
+
 async function loadConfigInternal<T>(
     name: string,
     extensions: string[],
     cwd: string,
     maxDepth: number,
     preferredPath: string | undefined,
+    packageJsonProperty: string | undefined,
 ): Promise<LoadConfigResult<T>> {
+    if (packageJsonProperty) {
+        const packageJsonPath = findPackageJson(cwd, maxDepth);
+        if (packageJsonPath) {
+            const packageJson =
+                await parseConfigFile<Record<string, unknown>>(packageJsonPath);
+            if (
+                packageJson &&
+                typeof packageJson === "object" &&
+                packageJsonProperty in packageJson
+            ) {
+                return {
+                    config: packageJson[packageJsonProperty] as T,
+                    filepath: packageJsonPath,
+                };
+            }
+        }
+    }
+
     if (preferredPath) {
         const resolvedPath = resolve(cwd, preferredPath);
         const config = await parseConfigFile<T>(resolvedPath);
@@ -100,13 +214,19 @@ export async function loadConfig<T = unknown>(
 ): Promise<LoadConfigResult<T>> {
     if (typeof nameOrOptions === "string") {
         const name = nameOrOptions;
-        const { cwd = process.cwd(), maxDepth = 10, preferredPath } = options;
+        const {
+            cwd = process.cwd(),
+            maxDepth = 10,
+            preferredPath,
+            packageJsonProperty,
+        } = options;
         return loadConfigInternal<T>(
             name,
             extensions,
             cwd,
             maxDepth,
             preferredPath,
+            packageJsonProperty,
         );
     }
 
@@ -116,6 +236,14 @@ export async function loadConfig<T = unknown>(
         cwd = process.cwd(),
         maxDepth = 10,
         preferredPath,
+        packageJsonProperty,
     } = nameOrOptions;
-    return loadConfigInternal<T>(name, exts, cwd, maxDepth, preferredPath);
+    return loadConfigInternal<T>(
+        name,
+        exts,
+        cwd,
+        maxDepth,
+        preferredPath,
+        packageJsonProperty,
+    );
 }
