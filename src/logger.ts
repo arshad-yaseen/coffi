@@ -12,7 +12,13 @@ class Logger {
     public warn(message: string): void {
         const yellowColor = "\x1b[33m";
         const resetColor = "\x1b[0m";
-        console.log(`${yellowColor}WARNING: ${message}${resetColor}`);
+        console.warn(`${yellowColor}WARNING: ${message}${resetColor}`);
+    }
+
+    public debug(message: string): void {
+        const blueColor = "\x1b[34m";
+        const resetColor = "\x1b[0m";
+        console.debug(`${blueColor}DEBUG: ${message}${resetColor}`);
     }
 }
 
