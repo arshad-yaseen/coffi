@@ -1,0 +1,12 @@
+{
+    // This is a single line comment
+    "name": "commented-config",
+    /* This is a
+       multi-line comment */
+    "version": "1.0.0",
+    // Another single line comment
+    "settings": {
+        "enabled": true, // Inline comment
+        "count": 42
+    }
+}

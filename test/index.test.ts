@@ -193,4 +193,30 @@ describe("loadConfig", () => {
         expect(filepath).toBe(path.join(FIXTURES_DIR, "config.ts"));
         expect(config?.name).toBe("config");
     });
+
+    describe("JSON comment stripping", () => {
+        it("should load JSON config with comments correctly", async () => {
+            const { config, filepath } = await loadConfig<{
+                name: string;
+                version: string;
+                settings: { enabled: boolean; count: number };
+            }>({
+                name: "commentedConfig",
+                cwd: FIXTURES_DIR,
+                extensions: [".json"],
+            });
+
+            expect(filepath).toBe(
+                path.join(FIXTURES_DIR, "commentedConfig.json"),
+            );
+            expect(config).toEqual({
+                name: "commented-config",
+                version: "1.0.0",
+                settings: {
+                    enabled: true,
+                    count: 42,
+                },
+            });
+        });
+    });
 });

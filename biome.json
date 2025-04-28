@@ -14,5 +14,11 @@
         "enabled": true,
         "indentStyle": "space",
         "indentWidth": 4
+    },
+    "json": {
+        "parser": {
+            "allowComments": true,
+            "allowTrailingCommas": true
+        }
     }
 }
