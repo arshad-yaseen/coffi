@@ -23,7 +23,9 @@
         "config-files-loader"
     ],
     "license": "MIT",
-    "dependencies": {},
+    "dependencies": {
+        "strip-json-comments": "^5.0.1"
+    },
     "scripts": {
         "build": "bunup",
         "dev": "bunup --watch",

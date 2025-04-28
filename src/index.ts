@@ -1,5 +1,7 @@
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
+import stripJsonComments from "strip-json-comments";
 import { logger } from "./logger";
 
 export type Extention =
@@ -21,58 +23,17 @@ const DEFAULT_EXTENSIONS: Extention[] = [
     ".json",
 ];
 
-/**
- * Options for loading a configuration file.
- */
 export interface LoadConfigOptions {
-    /**
-     * The name of the configuration file without extension.
-     */
     name: string;
-
-    /**
-     * An array of file extensions to look for, in order of priority.
-     * Defaults to [".ts", ".mts", ".cts", ".js", ".mjs", ".cjs", ".json"]
-     */
     extensions?: Extention[];
-
-    /**
-     * The current working directory to start searching from.
-     * Defaults to process.cwd()
-     */
     cwd?: string;
-
-    /**
-     * The maximum depth to search up the directory tree.
-     * Defaults to 10.
-     */
     maxDepth?: number;
-
-    /**
-     * The preferred path to the configuration file.
-     * If provided, directly load the config from this path after checking package.json.
-     */
     preferredPath?: string;
-
-    /**
-     * The property name in package.json to extract the configuration from.
-     * If provided, this takes precedence over all other configuration sources.
-     */
     packageJsonProperty?: string;
 }
 
-/**
- * Result returned from loading a configuration file.
- */
 export interface LoadConfigResult<T> {
-    /**
-     * The loaded configuration object or null if no configuration file was found.
-     */
     config: T | null;
-
-    /**
-     * The full path to the loaded configuration file or null if no configuration file was found.
-     */
     filepath: string | null;
 }
 
@@ -93,8 +54,9 @@ async function parseConfigFile<T>(filepath: string): Promise<T | null> {
         const ext = filepath.slice(filepath.lastIndexOf(".")).toLowerCase();
 
         if (ext === ".json") {
-            const file = readFileSync(filepath, "utf-8");
-            return JSON.parse(file) as T;
+            const file = await readFile(filepath, "utf-8");
+            const stripped = stripJsonComments(file);
+            return JSON.parse(stripped) as T;
         }
 
         const module = await import(filepath);
@@ -110,16 +72,11 @@ async function parseConfigFile<T>(filepath: string): Promise<T | null> {
 
         return config as T;
     } catch (error) {
+        logger.error(`Failed to parse config file: ${filepath}`);
         return null;
     }
 }
 
-/**
- * Finds the nearest package.json file by searching up the directory tree from cwd.
- * @param cwd The starting directory.
- * @param maxDepth The maximum number of parent directories to search.
- * @returns The path to package.json or null if not found.
- */
 function findPackageJson(cwd: string, maxDepth: number): string | null {
     let currentDir = cwd;
     let currentDepth = 0;

@@ -20,6 +20,12 @@ class Logger {
         const resetColor = "\x1b[0m";
         console.debug(`${blueColor}DEBUG: ${message}${resetColor}`);
     }
+
+    public error(message: string): void {
+        const redColor = "\x1b[31m";
+        const resetColor = "\x1b[0m";
+        console.error(`${redColor}ERROR: ${message}${resetColor}`);
+    }
 }
 
 export const logger: Logger = Logger.getInstance();
