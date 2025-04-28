@@ -1,11 +1,29 @@
 {
     "name": "coffi",
-    "description": "⚡️ A fast, lightweight, easy-to-use, configuration files loader 📄",
     "version": "0.1.25",
     "main": "./dist/index.js",
-    "module": "./dist/index.mjs",
-    "types": "./dist/index.d.ts",
+    "module": "./dist/index.js",
+    "type": "module",
+    "devDependencies": {
+        "@biomejs/biome": "^1.9.4",
+        "@commitlint/cli": "^19.8.0",
+        "@commitlint/config-conventional": "^19.8.0",
+        "bumpp": "^10.1.0",
+        "bunup": "^0.5.10",
+        "husky": "^9.1.7",
+        "typescript": "^5.8.3",
+        "vitest": "^3.1.1"
+    },
+    "description": "⚡️ A fast, lightweight, easy-to-use, configuration files loader 📄",
     "files": ["dist"],
+    "keywords": [
+        "config",
+        "config-loader",
+        "config-files",
+        "config-files-loader"
+    ],
+    "license": "MIT",
+    "dependencies": {},
     "scripts": {
         "build": "bunup",
         "dev": "bunup --watch",
@@ -21,22 +39,5 @@
         "publish:ci": "bun publish --access public --no-git-checks",
         "prepare": "husky"
     },
-    "dependencies": {},
-    "keywords": [
-        "config",
-        "config-loader",
-        "config-files",
-        "config-files-loader"
-    ],
-    "devDependencies": {
-        "@biomejs/biome": "^1.9.4",
-        "@commitlint/cli": "^19.8.0",
-        "@commitlint/config-conventional": "^19.8.0",
-        "bumpp": "^10.1.0",
-        "bunup": "^0.3.68",
-        "husky": "^9.1.7",
-        "typescript": "^5.8.3",
-        "vitest": "^3.1.1"
-    },
-    "license": "MIT"
+    "types": "./dist/index.d.ts"
 }
