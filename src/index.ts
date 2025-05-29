@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import stripJsonComments from "strip-json-comments";
 import { logger } from "./logger";
+import { cleanJson } from "./utils";
 
 export type Extention =
     | ".ts"
@@ -55,7 +56,7 @@ async function parseConfigFile<T>(filepath: string): Promise<T | null> {
 
         if (ext === ".json") {
             const file = await readFile(filepath, "utf-8");
-            const stripped = stripJsonComments(file);
+            const stripped = cleanJson(file);
             return JSON.parse(stripped) as T;
         }
 
