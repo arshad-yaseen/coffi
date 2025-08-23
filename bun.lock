@@ -3,9 +3,6 @@
   "workspaces": {
     "": {
       "name": "coffi",
-      "dependencies": {
-        "strip-json-comments": "^5.0.1",
-      },
       "devDependencies": {
         "@biomejs/biome": "^1.9.4",
         "@commitlint/cli": "^19.8.0",

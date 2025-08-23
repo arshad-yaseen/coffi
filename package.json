@@ -1,19 +1,8 @@
 {
     "name": "coffi",
-    "description": "⚡️ A fast, lightweight, easy-to-use, configuration files loader 📄",
     "version": "0.1.31",
-    "type": "module",
-    "files": ["dist"],
-    "module": "./dist/index.js",
     "main": "./dist/index.cjs",
-    "types": "./dist/index.d.cts",
-    "exports": {
-        ".": {
-            "import": "./dist/index.js",
-            "require": "./dist/index.cjs",
-            "types": "./dist/index.d.cts"
-        }
-    },
+    "module": "./dist/index.js",
     "devDependencies": {
         "@biomejs/biome": "^1.9.4",
         "@commitlint/cli": "^19.8.0",
@@ -24,6 +13,15 @@
         "typescript": "^5.8.3",
         "vitest": "^3.1.1"
     },
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "require": "./dist/index.cjs",
+            "types": "./dist/index.d.cts"
+        }
+    },
+    "description": "⚡️ A fast, lightweight, easy-to-use, configuration files loader 📄",
+    "files": ["dist"],
     "keywords": [
         "config",
         "config-loader",
@@ -31,9 +29,6 @@
         "config-files-loader"
     ],
     "license": "MIT",
-    "dependencies": {
-        "strip-json-comments": "^5.0.1"
-    },
     "scripts": {
         "build": "bunup",
         "dev": "bunup --watch",
@@ -48,5 +43,7 @@
         "release": "bumpp --commit --push --tag",
         "publish:ci": "bun publish --access public --no-git-checks",
         "prepare": "husky"
-    }
+    },
+    "type": "module",
+    "types": "./dist/index.d.cts"
 }
