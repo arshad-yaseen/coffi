@@ -1,6 +1,7 @@
-import { existsSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
+import stripJsonComments from "strip-json-comments";
 import { logger } from "./logger";
 import { cleanJson } from "./utils";
 
@@ -37,13 +38,7 @@ export interface LoadConfigResult<T> {
     filepath: string | null;
 }
 
-interface CacheEntry<T> {
-    config: T | null;
-    filepath: string | null;
-    mtime: number;
-}
-
-const cache = new Map<string, CacheEntry<any>>();
+const fileCache = new Map<string, string>();
 
 function _exists(filepath: string): boolean {
     try {
@@ -53,38 +48,13 @@ function _exists(filepath: string): boolean {
     }
 }
 
-function getCacheKey(
-    name: string,
-    extensions: string[],
-    cwd: string,
-    maxDepth: number,
-    preferredPath: string | undefined,
-    packageJsonProperty: string | undefined,
-): string {
-    return JSON.stringify({
-        name,
-        extensions,
-        cwd,
-        maxDepth,
-        preferredPath,
-        packageJsonProperty,
-    });
-}
-
-function getFileMtime(filepath: string): number {
-    try {
-        return statSync(filepath).mtimeMs;
-    } catch {
-        return 0;
+async function readFileWithCache(filepath: string): Promise<string> {
+    if (fileCache.has(filepath)) {
+        return fileCache.get(filepath)!;
     }
-}
-
-function isCacheValid<T>(cacheEntry: CacheEntry<T>): boolean {
-    if (!cacheEntry.filepath) {
-        return true;
-    }
-    const currentMtime = getFileMtime(cacheEntry.filepath);
-    return currentMtime === cacheEntry.mtime;
+    const content = await readFile(filepath, "utf-8");
+    fileCache.set(filepath, content);
+    return content;
 }
 
 async function parseConfigFile<T>(filepath: string): Promise<T | null> {
@@ -94,7 +64,7 @@ async function parseConfigFile<T>(filepath: string): Promise<T | null> {
         }
         const ext = filepath.slice(filepath.lastIndexOf(".")).toLowerCase();
         if (ext === ".json") {
-            const file = await readFile(filepath, "utf-8");
+            const file = await readFileWithCache(filepath);
             const stripped = cleanJson(file);
             return JSON.parse(stripped) as T;
         }
@@ -148,20 +118,6 @@ async function loadConfigInternal<T>(
     preferredPath: string | undefined,
     packageJsonProperty: string | undefined,
 ): Promise<LoadConfigResult<T>> {
-    const cacheKey = getCacheKey(
-        name,
-        extensions,
-        cwd,
-        maxDepth,
-        preferredPath,
-        packageJsonProperty,
-    );
-    const cached = cache.get(cacheKey);
-
-    if (cached && isCacheValid(cached)) {
-        return { config: cached.config, filepath: cached.filepath };
-    }
-
     if (packageJsonProperty) {
         const packageJsonPath = findPackageJson(cwd, maxDepth);
         if (packageJsonPath) {
@@ -172,35 +128,23 @@ async function loadConfigInternal<T>(
                 typeof packageJson === "object" &&
                 packageJsonProperty in packageJson
             ) {
-                const result = {
+                return {
                     config: packageJson[packageJsonProperty] as T,
                     filepath: packageJsonPath,
                 };
-                cache.set(cacheKey, {
-                    ...result,
-                    mtime: getFileMtime(packageJsonPath),
-                });
-                return result;
             }
         }
     }
-
     if (preferredPath) {
         const resolvedPath = resolve(cwd, preferredPath);
         const config = await parseConfigFile<T>(resolvedPath);
         if (config !== null) {
-            const result = { config, filepath: resolvedPath };
-            cache.set(cacheKey, {
-                ...result,
-                mtime: getFileMtime(resolvedPath),
-            });
-            return result;
+            return { config, filepath: resolvedPath };
         }
         logger.warn(
             `Preferred path "${preferredPath}" not found or invalid, searching for ${name} files instead.`,
         );
     }
-
     let currentDir = cwd;
     let currentDepth = 0;
     while (currentDepth < maxDepth) {
@@ -213,12 +157,7 @@ async function loadConfigInternal<T>(
                     const filepath = join(currentDir, filename);
                     const config = await parseConfigFile<T>(filepath);
                     if (config !== null) {
-                        const result = { config, filepath };
-                        cache.set(cacheKey, {
-                            ...result,
-                            mtime: getFileMtime(filepath),
-                        });
-                        return result;
+                        return { config, filepath };
                     }
                 }
             }
@@ -230,10 +169,7 @@ async function loadConfigInternal<T>(
         currentDir = parentDir;
         currentDepth++;
     }
-
-    const result = { config: null, filepath: null };
-    cache.set(cacheKey, { ...result, mtime: 0 });
-    return result;
+    return { config: null, filepath: null };
 }
 
 export async function loadConfig<T = unknown>(
