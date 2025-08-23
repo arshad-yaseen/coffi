@@ -30,7 +30,6 @@ export interface LoadConfigOptions {
     maxDepth?: number;
     preferredPath?: string;
     packageJsonProperty?: string;
-    useCache?: boolean;
 }
 
 export interface LoadConfigResult<T> {
@@ -39,86 +38,12 @@ export interface LoadConfigResult<T> {
 }
 
 interface CacheEntry<T> {
-    config: T;
+    config: T | null;
+    filepath: string | null;
     mtime: number;
-    filepath: string;
 }
 
-class ConfigCache {
-    public cache = new Map<string, CacheEntry<unknown>>();
-
-    get<T>(key: string): T | null {
-        const entry = this.cache.get(key);
-        if (!entry) {
-            return null;
-        }
-        try {
-            const stats = statSync(entry.filepath);
-            if (stats.mtimeMs === entry.mtime) {
-                return entry.config as T;
-            }
-            this.cache.delete(key);
-            return null;
-        } catch {
-            this.cache.delete(key);
-            return null;
-        }
-    }
-
-    set<T>(key: string, config: T, filepath: string): void {
-        try {
-            const stats = statSync(filepath);
-            this.cache.set(key, {
-                config,
-                mtime: stats.mtimeMs,
-                filepath,
-            });
-        } catch {
-            logger.warn(
-                `Could not cache config for ${filepath}: unable to get file stats`,
-            );
-        }
-    }
-
-    clear(): void {
-        this.cache.clear();
-    }
-
-    has(key: string): boolean {
-        return this.cache.has(key);
-    }
-
-    delete(key: string): boolean {
-        return this.cache.delete(key);
-    }
-
-    size(): number {
-        return this.cache.size;
-    }
-
-    static generateKey(
-        name: string,
-        extensions: string[],
-        cwd: string,
-        maxDepth: number,
-        preferredPath: string | undefined,
-        packageJsonProperty: string | undefined,
-    ): string {
-        const params = {
-            name,
-            extensions: extensions.sort().join(","),
-            cwd,
-            maxDepth,
-            preferredPath: preferredPath || "",
-            packageJsonProperty: packageJsonProperty || "",
-        };
-        return JSON.stringify(params);
-    }
-}
-
-const configCache = new ConfigCache();
-
-export { configCache };
+const cache = new Map<string, CacheEntry<any>>();
 
 function _exists(filepath: string): boolean {
     try {
@@ -126,6 +51,40 @@ function _exists(filepath: string): boolean {
     } catch {
         return false;
     }
+}
+
+function getCacheKey(
+    name: string,
+    extensions: string[],
+    cwd: string,
+    maxDepth: number,
+    preferredPath: string | undefined,
+    packageJsonProperty: string | undefined,
+): string {
+    return JSON.stringify({
+        name,
+        extensions,
+        cwd,
+        maxDepth,
+        preferredPath,
+        packageJsonProperty,
+    });
+}
+
+function getFileMtime(filepath: string): number {
+    try {
+        return statSync(filepath).mtimeMs;
+    } catch {
+        return 0;
+    }
+}
+
+function isCacheValid<T>(cacheEntry: CacheEntry<T>): boolean {
+    if (!cacheEntry.filepath) {
+        return true;
+    }
+    const currentMtime = getFileMtime(cacheEntry.filepath);
+    return currentMtime === cacheEntry.mtime;
 }
 
 async function parseConfigFile<T>(filepath: string): Promise<T | null> {
@@ -188,9 +147,8 @@ async function loadConfigInternal<T>(
     maxDepth: number,
     preferredPath: string | undefined,
     packageJsonProperty: string | undefined,
-    useCache = true,
 ): Promise<LoadConfigResult<T>> {
-    const cacheKey = ConfigCache.generateKey(
+    const cacheKey = getCacheKey(
         name,
         extensions,
         cwd,
@@ -198,17 +156,10 @@ async function loadConfigInternal<T>(
         preferredPath,
         packageJsonProperty,
     );
+    const cached = cache.get(cacheKey);
 
-    if (useCache) {
-        const cachedConfig = configCache.get<T>(cacheKey);
-        if (cachedConfig !== null) {
-            logger.debug(`Config loaded from cache for key: ${cacheKey}`);
-            const cachedEntry = configCache.cache.get(cacheKey);
-            return {
-                config: cachedConfig,
-                filepath: cachedEntry?.filepath || null,
-            };
-        }
+    if (cached && isCacheValid(cached)) {
+        return { config: cached.config, filepath: cached.filepath };
     }
 
     if (packageJsonProperty) {
@@ -225,9 +176,10 @@ async function loadConfigInternal<T>(
                     config: packageJson[packageJsonProperty] as T,
                     filepath: packageJsonPath,
                 };
-                if (useCache && result.config !== null) {
-                    configCache.set(cacheKey, result.config, packageJsonPath);
-                }
+                cache.set(cacheKey, {
+                    ...result,
+                    mtime: getFileMtime(packageJsonPath),
+                });
                 return result;
             }
         }
@@ -238,9 +190,10 @@ async function loadConfigInternal<T>(
         const config = await parseConfigFile<T>(resolvedPath);
         if (config !== null) {
             const result = { config, filepath: resolvedPath };
-            if (useCache) {
-                configCache.set(cacheKey, config, resolvedPath);
-            }
+            cache.set(cacheKey, {
+                ...result,
+                mtime: getFileMtime(resolvedPath),
+            });
             return result;
         }
         logger.warn(
@@ -261,9 +214,10 @@ async function loadConfigInternal<T>(
                     const config = await parseConfigFile<T>(filepath);
                     if (config !== null) {
                         const result = { config, filepath };
-                        if (useCache) {
-                            configCache.set(cacheKey, config, filepath);
-                        }
+                        cache.set(cacheKey, {
+                            ...result,
+                            mtime: getFileMtime(filepath),
+                        });
                         return result;
                     }
                 }
@@ -276,7 +230,10 @@ async function loadConfigInternal<T>(
         currentDir = parentDir;
         currentDepth++;
     }
-    return { config: null, filepath: null };
+
+    const result = { config: null, filepath: null };
+    cache.set(cacheKey, { ...result, mtime: 0 });
+    return result;
 }
 
 export async function loadConfig<T = unknown>(
@@ -291,7 +248,6 @@ export async function loadConfig<T = unknown>(
             maxDepth = 10,
             preferredPath,
             packageJsonProperty,
-            useCache = true,
         } = options;
         return loadConfigInternal<T>(
             name,
@@ -300,7 +256,6 @@ export async function loadConfig<T = unknown>(
             maxDepth,
             preferredPath,
             packageJsonProperty,
-            useCache,
         );
     }
     const {
@@ -310,7 +265,6 @@ export async function loadConfig<T = unknown>(
         maxDepth = 10,
         preferredPath,
         packageJsonProperty,
-        useCache = true,
     } = nameOrOptions;
     return loadConfigInternal<T>(
         name,
@@ -319,21 +273,5 @@ export async function loadConfig<T = unknown>(
         maxDepth,
         preferredPath,
         packageJsonProperty,
-        useCache,
     );
-}
-
-export function clearConfigCache(): void {
-    configCache.clear();
-    logger.debug("Configuration cache cleared");
-}
-
-export function getCacheStats(): {
-    size: number;
-    keys: string[];
-} {
-    return {
-        size: configCache.size(),
-        keys: Array.from(configCache.cache.keys()),
-    };
 }
