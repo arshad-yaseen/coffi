@@ -1,5 +1,3 @@
-import { existsSync, readdirSync } from "node:fs";
-import { readFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { logger } from "./logger";
 import { cleanJson } from "./utils";
@@ -37,9 +35,9 @@ export interface LoadConfigResult<T> {
     filepath: string | null;
 }
 
-function _exists(filepath: string): boolean {
+async function _exists(filepath: string): Promise<boolean> {
     try {
-        return existsSync(filepath);
+        return await Bun.file(filepath).exists();
     } catch {
         return false;
     }
@@ -47,14 +45,14 @@ function _exists(filepath: string): boolean {
 
 async function parseConfigFile<T>(filepath: string): Promise<T | null> {
     try {
-        if (!_exists(filepath)) {
+        if (!(await _exists(filepath))) {
             return null;
         }
 
         const ext = filepath.slice(filepath.lastIndexOf(".")).toLowerCase();
 
         if (ext === ".json") {
-            const file = await readFile(filepath, "utf-8");
+            const file = await Bun.file(filepath).text();
             const stripped = cleanJson(file);
             return JSON.parse(stripped) as T;
         }
@@ -86,13 +84,16 @@ function parseErrorMessage(error: unknown): string {
     return String(error);
 }
 
-function findPackageJson(cwd: string, maxDepth: number): string | null {
+async function findPackageJson(
+    cwd: string,
+    maxDepth: number,
+): Promise<string | null> {
     let currentDir = cwd;
     let currentDepth = 0;
 
     while (currentDepth < maxDepth) {
         const packageJsonPath = join(currentDir, "package.json");
-        if (_exists(packageJsonPath)) {
+        if (await _exists(packageJsonPath)) {
             return packageJsonPath;
         }
         const parentDir = dirname(currentDir);
@@ -114,7 +115,7 @@ async function loadConfigInternal<T>(
     packageJsonProperty: string | undefined,
 ): Promise<LoadConfigResult<T>> {
     if (packageJsonProperty) {
-        const packageJsonPath = findPackageJson(cwd, maxDepth);
+        const packageJsonPath = await findPackageJson(cwd, maxDepth);
         if (packageJsonPath) {
             const packageJson =
                 await parseConfigFile<Record<string, unknown>>(packageJsonPath);
@@ -147,7 +148,9 @@ async function loadConfigInternal<T>(
 
     while (currentDepth < maxDepth) {
         try {
-            const files = readdirSync(currentDir);
+            const files = await Array.fromAsync(
+                new Bun.Glob("*").scan({ cwd: currentDir, onlyFiles: false }),
+            );
             const fileSet = new Set(files);
 
             for (const ext of extensions) {

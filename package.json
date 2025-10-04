@@ -1,27 +1,35 @@
 {
     "name": "coffi",
+    "description": "📄 A fast, lightweight, easy-to-use, configuration files loader for Bun",
     "version": "0.1.35",
-    "main": "./dist/index.cjs",
+    "type": "module",
+    "files": ["dist"],
     "module": "./dist/index.js",
+    "main": "./dist/index.cjs",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": {
+                "types": "./dist/index.d.ts",
+                "default": "./dist/index.js"
+            },
+            "require": {
+                "types": "./dist/index.d.cts",
+                "default": "./dist/index.cjs"
+            }
+        },
+        "./package.json": "./package.json"
+    },
     "devDependencies": {
         "@biomejs/biome": "^1.9.4",
         "@commitlint/cli": "^19.8.0",
         "@commitlint/config-conventional": "^19.8.0",
+        "@types/bun": "^1.2.23",
         "bumpp": "^10.1.0",
-        "bunup": "^0.8.19",
+        "bunup": "^0.14.14",
         "husky": "^9.1.7",
-        "typescript": "^5.8.3",
-        "vitest": "^3.1.1"
+        "typescript": "^5.8.3"
     },
-    "exports": {
-        ".": {
-            "import": "./dist/index.js",
-            "require": "./dist/index.cjs",
-            "types": "./dist/index.d.cts"
-        }
-    },
-    "description": "⚡️ A fast, lightweight, easy-to-use, configuration files loader 📄",
-    "files": ["dist"],
     "keywords": [
         "config",
         "config-loader",
@@ -37,13 +45,11 @@
         "format": "biome format .",
         "format:fix": "biome format --write .",
         "tsc": "tsc --noEmit",
-        "test": "vitest run",
-        "test:watch": "vitest",
-        "test:coverage": "vitest run --coverage",
+        "test": "bun test",
+        "test:watch": "bun test --watch",
+        "test:coverage": "bun test --coverage",
         "release": "bumpp --commit --push --tag",
         "publish:ci": "bun publish --access public --no-git-checks",
         "prepare": "husky"
-    },
-    "type": "module",
-    "types": "./dist/index.d.cts"
+    }
 }
