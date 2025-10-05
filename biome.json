@@ -13,14 +13,15 @@
             "style": {
                 "noNonNullAssertion": "off"
             }
-        },
-        "ignore": ["dist", "node_modules"]
+        }
     },
     "formatter": {
         "enabled": true,
         "indentStyle": "space",
-        "indentWidth": 4,
-        "ignore": ["tsconfig.json"]
+        "indentWidth": 4
+    },
+    "files": {
+        "ignore": ["dist"]
     },
     "json": {
         "parser": {
